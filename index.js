@@ -1,10 +1,15 @@
-const express = require('express');
+const express = require("express");
+const { getOperators } = require("./server_connection");
+
 
 const app = express();
 const port = 4000;
 
 app.listen(port, () => {
-    console.log("App running in port: " + port);
-})
+});
 
-
+app.get("/getActivities", (req, res) => {
+  getOperators(rc => {
+    res.send({status : 200, operators : rc});
+  })
+});
