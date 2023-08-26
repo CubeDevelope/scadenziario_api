@@ -1,5 +1,4 @@
-const { query } = require("express");
-const Operator = require("./models/operator");
+const TYPES = require("tedious").TYPES;
 
 const Connection = require("tedious").Connection;
 const Request = require("tedious").Request;
@@ -20,45 +19,54 @@ var config = {
   },
 };
 
-const connection = new Connection(config);
+const connections = [];
 
-connection.connect((e) => {
-  if (e) {
-    throw e;
-  } else {
-    console.log("Connected 1");
-  }
-});
+const _addConnection = async (connectedCallback) => {
+  const connectionPosition = connections.length;
+  connections.push(new Connection(config));
+  await _connectConnection(
+    (position = connectionPosition),
+    (callback = () => {
+      if (connectedCallback != null) connectedCallback(connectionPosition);
+    })
+  );
+};
 
-function _createQuery(query, callback) {
+const _connectConnection = async (position, callback) => {
+  await connections[position].connect((e) => {
+    if (e) {
+      console.log("Connection n°" + position + " not connected");
+      throw e;
+    } else {
+      console.log("Connection n°" + position + " is connected");
+
+      callback();
+    }
+  });
+};
+
+const _createQuery = async (query, callback) => {
+  var readyConnection = null;
+
   const request = new Request(query, (e, rc, rws) => {
-    console.log("Entrato" + rc);
-
-    if (e) throw e;
     callback(rws);
   });
 
-  connection.execSql(request);
-}
-
-const getActiviesFromDB = (callback) => {
-  _createQuery("select * from activities");
-};
-
-const getOperators = function (callback) {
-  _createQuery("select * from operators", (rws) => {
-    const operators = [];
-
-    try {
-      for (var i = 0; i < rws.length; i++) {
-        operators.push(Operator.fromJson(rws[i]));
-      }
-    } catch (e) {
-      console.log(e);
+  for (var i = 0; i < connections.length; i++) {
+    const element = connections[i];
+    if (element.state === element.STATE.LOGGED_IN) {
+      readyConnection = element;
+      break;
     }
+  }
 
-    callback(operators);
-  });
+  if (readyConnection === null) {
+    _addConnection((position) => {
+      connections[position].execSql(request);
+    });
+  } else {
+    readyConnection.execSql(request);
+  }
 };
 
-module.exports = { getOperators, getActiviesFromDB };
+module.exports = _createQuery;
