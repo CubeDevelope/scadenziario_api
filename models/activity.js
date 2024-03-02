@@ -1,4 +1,8 @@
-const {quoteString} = require("../utils");
+const {
+  quoteString,
+  sanityzeTextToDB,
+  sanityzeTextFromDB,
+} = require("../utils");
 
 class Activity {
   /*
@@ -50,21 +54,38 @@ class Activity {
 
   static fromDB(map) {
     const activity = new Activity();
-    map.forEach(element => {
-      switch(element.metadata.colName) {
-        case "uid": activity.uid = element.value; break;
-        case "creationDate": activity.creationDate = element.value; break;
-        case "procedureId": activity.procedureId = element.value; break;
-        case "recurrenceId": activity.recurrenceId = element.value; break;
-        case "alternativeName": activity.alternativeName = element.value; break;
-        case "deadline": activity.deadline = element.value; break;
-        case "operatorId": activity.operatorId = element.value; break;
-        case "stateId": activity.stateId = element.value; break;
-        case "notes": activity.notes = element.value; break;
-      } 
+    map.forEach((element) => {
+      switch (element.metadata.colName) {
+        case "uid":
+          activity.uid = element.value;
+          break;
+        case "creationDate":
+          activity.creationDate = element.value;
+          break;
+        case "procedureId":
+          activity.procedureId = element.value;
+          break;
+        case "recurrenceId":
+          activity.recurrenceId = element.value;
+          break;
+        case "alternativeName":
+          activity.alternativeName = sanityzeTextFromDB(element.value);
+          break;
+        case "deadline":
+          activity.deadline = element.value;
+          break;
+        case "operatorId":
+          activity.operatorId = element.value;
+          break;
+        case "stateId":
+          activity.stateId = element.value;
+          break;
+        case "notes":
+          activity.notes = sanityzeTextFromDB(element.value);
+          break;
+      }
     });
     return activity;
-    
   }
 
   toJson() {
@@ -90,7 +111,7 @@ class Activity {
       ", stateId = " +
       this.stateId +
       ", notes = " +
-      quoteString(this.notes)
+      quoteString(sanityzeTextToDB(this.notes))
     );
   }
 
@@ -103,7 +124,7 @@ class Activity {
       "," +
       this.recurrenceId +
       "," +
-      quoteString(this.alternativeName) +
+      quoteString(sanityzeTextToDB(this.alternativeName)) +
       "," +
       this.deadline +
       "," +
@@ -111,7 +132,7 @@ class Activity {
       "," +
       this.stateId +
       "," +
-      quoteString(this.notes) +
+      quoteString(sanityzeTextToDB(this.notes)) +
       ")"
     );
   }

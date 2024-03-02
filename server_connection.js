@@ -3,19 +3,17 @@ const TYPES = require("tedious").TYPES;
 const Connection = require("tedious").Connection;
 const Request = require("tedious").Request;
 var config = {
-  server: "0.0.0.0",
+  server: "dc1",
   authentication: {
     type: "default",
     options: {
       userName: "sa",
-      password: "MSSQL2022_llb",
+      password: "saPassOmassiSQL9!",
     },
   },
   options: {
-    database: "Scadenziario",
-    port: 1433,
-    trustServerCertificate: true,
     rowCollectionOnRequestCompletion: true,
+    trustServerCertificate: true,
   },
 };
 
@@ -72,9 +70,9 @@ const _getConnection = (callback) => {
 const _createQuery = async (query, callback) => {
   const request = new Request(query, (e, rc, rws) => {
     if (e) {
-      throw e;
+      console.log("Errore: ", e, "Query: ", query);
     }
-    if (callback != null) callback(rws);
+    if (callback != null) callback(rws, e);
   });
 
   _getConnection((connection, pos) => {

@@ -1,5 +1,6 @@
 function quoteString(value) {
   if (value == null) return null;
+
   return "'" + value + "'";
 }
 
@@ -11,4 +12,24 @@ function sortByString(a, b) {
   return 0;
 }
 
-module.exports = { quoteString, sortByString };
+function sanityzeTextToDB(text) {
+  if (text == null) return text;
+
+  var cleanText = text.replace("'", "&sap");
+  cleanText = cleanText.replace('"', "&dsap");
+  return cleanText;
+}
+
+function sanityzeTextFromDB(text) {
+  if (text == null) return text;
+  var cleanText = text.replace("&sap", "'");
+  cleanText = cleanText.replace("&dsap", '"');
+  return text.replace("&sap", "'");
+}
+
+module.exports = {
+  quoteString,
+  sortByString,
+  sanityzeTextToDB,
+  sanityzeTextFromDB,
+};

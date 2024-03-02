@@ -24,11 +24,10 @@ const getActiviesFromDB = (callback) => {
       rws.forEach((element) => {
         activities.push(Activity.fromDB(element));
       });
-      
+
       callback(activities);
     } catch (error) {
       console.error("Errore in getActiviesFromDB");
-      throw error;
     }
   });
 };
@@ -64,13 +63,12 @@ const getProceduresFromDB = (callback) => {
       }
     } catch (e) {
       console.log("Troppe richieste");
-      throw e;
     }
-    
+
     procedures.sort((a, b) => {
       return sortByString(a.name, b.name);
     });
-    
+
     callback(procedures);
   });
 };
@@ -85,7 +83,6 @@ const getRecurrenceFromDB = (callback) => {
       }
     } catch (e) {
       console.log("Troppe richieste");
-      throw e;
     }
     recurrence.sort((a, b) => {
       return sortByString(a.name, b.name);
@@ -104,7 +101,6 @@ const getActivityStatesFromDB = (callback) => {
       }
     } catch (e) {
       console.log("Troppe richieste");
-      throw e;
     }
 
     activityStates.sort((a, b) => {
@@ -124,7 +120,6 @@ const getProcedureTypesFromDB = (callback) => {
       }
     } catch (e) {
       console.log("Troppe richieste");
-      throw e;
     }
     callback(procedureTypes);
   });
