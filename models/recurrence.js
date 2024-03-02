@@ -5,7 +5,7 @@ class Recurrence {
     }
   
     static fromJson(map) {
-      return new Procedure(map[0].value, map[1].value);
+      return new Recurrence(map[0].value, map[1].value);
     }
   
     toJson() {

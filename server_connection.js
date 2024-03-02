@@ -22,14 +22,12 @@ var config = {
 const connections = [];
 
 const _addConnection = async (connectedCallback) => {
-  const connectionPosition = connections.length;
   connections.push(new Connection(config));
-  await _connectConnection(
-    (position = connectionPosition),
-    (callback = () => {
-      if (connectedCallback != null) connectedCallback(connectionPosition);
-    })
-  );
+  const connectionPosition = connections.length - 1;
+
+  await _connectConnection(connectionPosition, () => {
+    if (connectedCallback != null) connectedCallback(connectionPosition);
+  });
 };
 
 const _connectConnection = async (position, callback) => {
@@ -45,28 +43,88 @@ const _connectConnection = async (position, callback) => {
   });
 };
 
-const _createQuery = async (query, callback) => {
+const _getConnection = (callback) => {
   var readyConnection = null;
-
-  const request = new Request(query, (e, rc, rws) => {
-    callback(rws);
-  });
+  var actualConnectionPosition = -1;
 
   for (var i = 0; i < connections.length; i++) {
     const element = connections[i];
+
     if (element.state === element.STATE.LOGGED_IN) {
       readyConnection = element;
+      actualConnectionPosition = i;
+
       break;
     }
   }
 
   if (readyConnection === null) {
-    _addConnection((position) => {
-      connections[position].execSql(request);
+    _addConnection((pos) => {
+      callback(connections[pos], pos);
     });
   } else {
-    readyConnection.execSql(request);
+    callback(readyConnection, actualConnectionPosition);
   }
 };
 
-module.exports = _createQuery;
+// Base queries
+
+const _createQuery = async (query, callback) => {
+  const request = new Request(query, (e, rc, rws) => {
+    if (e) {
+      throw e;
+    }
+    if (callback != null) callback(rws);
+  });
+
+  _getConnection((connection, pos) => {
+    connection.execSql(request);
+  });
+};
+
+const _execTransaction = () => {};
+
+// Insert
+
+const _insertRow = (tableName, row, callback) => {
+  const query = "INSERT INTO " + tableName + " VALUES " + row;
+
+  _createQuery(query, callback);
+};
+
+const _updateRow = (tableName, data, id, callback) => {
+  const query =
+    "UPDATE " + tableName + " SET " + data + " WHERE uid = '" + id + "'";
+
+  _createQuery(query, callback);
+};
+
+const _deleteRows = (tableName, ids, callback) => {
+  ids.forEach((id) => {
+    const query = "DELETE FROM " + tableName + " WHERE uid = '" + id + "'";
+    _createQuery(query);
+  });
+
+  callback();
+};
+
+const _selectQuery = (tableName, columns = [], callback) => {
+  var query = "SELECT ";
+  if (columns.length == 0) query += "*";
+  else
+    for (let index = 0; index < columns.length; index++) {
+      query = columns[index];
+      if (index !== columns.length - 1) query += ", ";
+    }
+
+  query += "  FROM " + tableName;
+  return query;
+};
+
+module.exports = {
+  _createQuery,
+  _insertRow,
+  _deleteRows,
+  _updateRow,
+  _selectQuery,
+};
