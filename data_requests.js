@@ -45,10 +45,6 @@ const getOperatorsFromDB = function (callback) {
       console.log(e);
     }
 
-    operators.sort((a, b) => {
-      return sortByString(a.name, b.name);
-    });
-
     callback(operators);
   });
 };
@@ -103,9 +99,6 @@ const getActivityStatesFromDB = (callback) => {
       console.log("Troppe richieste");
     }
 
-    activityStates.sort((a, b) => {
-      return sortByString(a.name, b.name);
-    });
     callback(activityStates);
   });
 };
