@@ -72,7 +72,7 @@ const _getConnection = (callback) => {
 const _createQuery = async (query, callback) => {
   const request = new Request(query, (e, rc, rws) => {
     if (e) {
-      throw e;
+      console.log(e);
     }
     if (callback != null) callback(rws);
   });

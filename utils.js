@@ -15,15 +15,15 @@ function sortByString(a, b) {
 function sanityzeTextToDB(text) {
   if (text == null) return text;
 
-  var cleanText = text.replace("'", "&sap");
-  cleanText = cleanText.replace('"', "&dsap");
+  var cleanText = text.replace(/'/g, "&sap");
+  cleanText = cleanText.replace(/"/g, "&dsap");
   return cleanText;
 }
 
 function sanityzeTextFromDB(text) {
   if (text == null) return text;
-  var cleanText = text.replace("&sap", "'");
-  cleanText = cleanText.replace("&dsap", '"');
+  var cleanText = text.replace(/&sap/g, "'");
+  cleanText = cleanText.replace(/&dsap/g, '"');
   return text.replace("&sap", "'");
 }
 
